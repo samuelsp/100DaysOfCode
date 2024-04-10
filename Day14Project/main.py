@@ -39,7 +39,7 @@ def game():
   while play_game:
 
     while personality_a == personality_b:
-      personality_a = choose_personality()
+      personality_b = choose_personality()
     
     followers_a = personality_a['follower_count']
     followers_b = personality_b['follower_count']
