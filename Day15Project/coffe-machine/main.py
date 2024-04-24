@@ -4,7 +4,7 @@ from coins import *
 resources_machine = {**resources, "money": 0.0}
 drinks = ['espresso', 'latte', 'cappuccino']
 
-def view_resources(resources_machine):
+def view_resources():
     return f'''
         Water:  { resources_machine["water"]  }ml 
         Milk:   { resources_machine["milk"]  }ml
@@ -16,75 +16,55 @@ def count_coins(quarters: float, dimes: float, nickles: float, pennies: float):
     total = QUARTERS * quarters + DIMES * dimes + NICKLES * nickles + PENNIES * pennies
     return total
 
-def check_resources_machine(resources_machine, drink_selected):
-    ingredients = MENU[drink_selected]['ingredients']
+def check_resources_machine(order_drink):
+    ingredients = MENU[order_drink]['ingredients']
 
-    if 'water' in ingredients:
-        water = ingredients["water"]
-        if water > resources_machine["water"]:
-            print("Sorry there is not enough water.")
+    for ingredient in ingredients:
+        drink_ingredient = ingredients[ingredient]
+        if drink_ingredient > resources_machine[ingredient]:
+            print(f"Sorry there is not enough {ingredient}.")
             return False
-
-    if 'milk' in ingredients:
-        milk = ingredients["milk"]
-        if milk > resources_machine["milk"]:
-           print("Sorry there is not enough milk.")
-           return False
-
-    if 'coffe' in ingredients:
-        coffee = ingredients["coffee"]
-        if coffee > resources_machine["coffee"]:
-           print("Sorry there is not enough coffee.")
-           return False
 
     return True
 
-def make_coffee(resources_machine, chosen_drink):
-    ingredients = MENU[chosen_drink]['ingredients']
+def make_coffee(order_drink):
+    ingredients = MENU[order_drink]['ingredients']
 
-    if 'water' in ingredients:
-        water = ingredients["water"]
-        resources_machine["water"] -= water
+    for ingredient in ingredients:
+        drink_ingredient = ingredients[ingredient]
+        resources_machine[ingredient] -= drink_ingredient
 
-    if 'milk' in ingredients:
-        milk = ingredients["milk"]
-        resources_machine["milk"] -= milk
-
-    if 'coffee' in ingredients:
-        coffee = ingredients["coffee"]
-        resources_machine["coffee"] -= coffee
-
-    return f"Here is your {chosen_drink}. Enjoy!"
+    return f"Here is your {order_drink} ☕. Enjoy!"
 
 def coffee_machine():
     choose_user = input("What would you like? (espresso/latte/cappuccino): ").lower()
     if choose_user == "report":
-        print(view_resources(resources_machine))
+        print(view_resources())
         return coffee_machine()
 
     elif choose_user in drinks:
-        if(check_resources_machine(resources_machine, choose_user)):
+        if(check_resources_machine(choose_user)):
             print("Please insert coins.")
             for coin in coins:
                 amount = float(input(f"How many {coin}: "))
                 user_coins.update({ coin : amount })
 
-            total_coins = count_coins( quarters = user_coins['quarters']
+            payment = count_coins( quarters = user_coins['quarters']
                                      , dimes    = user_coins['dimes']
                                      , nickles  = user_coins['nickles']
                                      , pennies  = user_coins['pennies'])
 
             cost_drink = MENU[choose_user]['cost']
 
-            if total_coins > cost_drink:
-                print(f"Here is ${(total_coins - cost_drink):.2f} dollars in change.")
+            if payment > cost_drink:
+                print(f"Here is ${(payment - cost_drink):.2f} dollars in change.")
 
-            elif total_coins < cost_drink:
+            elif payment < cost_drink:
                 print("Sorry that's not enough money. Money refunded.")
                 return coffee_machine()
 
-            print(make_coffee(resources_machine, choose_user))
             resources_machine["money"] += cost_drink
+            print(make_coffee(choose_user))
 
         return coffee_machine()
 
